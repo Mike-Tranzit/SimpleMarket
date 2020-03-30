@@ -6,7 +6,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { GoodsModule } from '@components/goods/goods.module';
-
 import { GoodsService } from '@services/goods.service';
 
 export function CategoriesPreloader(goodsServices: GoodsService) {

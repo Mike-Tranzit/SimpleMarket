@@ -1,75 +1,64 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { CurrencyService } from '@services/currency.service';
+
 import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import {
+  map,
+  pluck,
+  startWith,
+  switchMap,
+  take
+} from 'rxjs/operators';
+import { interval } from 'rxjs/internal/observable/interval';
+
 import { DATA, NAMES } from '@services/api';
+import { GoodsWrapper, GoodsToView } from '@models/interfaces/goods.interface';
 
-export const CategoriesActionsHandler = new Proxy(Array, {
-      construct(target: ArrayConstructor, argArray: any, newTarget?: any): object {
-        const cache = {};
-        return new Proxy(new target(...argArray), {
-          get(arr, prop) {
-            const targetArray = arr[0];
-            switch (prop) {
-              case 'findById': {
-                return id => {
-                  const newCache = typeof cache[id] === 'undefined';
-                  if (newCache) {
-                    cache[id] = targetArray[id];
-                  }
-                  return cache[id];
-                };
-                break;
-              }
-              default: {
-                return targetArray[prop];
-              }
-            }
-          }
-        });
-      }
-});
-
+import { sortGoodsWithCategories } from '@models/utils/goods.utils';
+import { CategoriesActionsHandler } from '@models/utils/category.proxy.utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoodsService {
-  public categoriesProxy: any;
-  constructor(private http: HttpClient) { }
+  public categoriesActionsHandler;
+  private INTERVAL_FETCH_DATA = 100000;
 
-  public loadCategories(): Promise<any> {
-      return this.http.get(NAMES).toPromise()
+  constructor(private http: HttpClient, private currencyService: CurrencyService) { }
+
+  public loadCategories(): void {
+      this.http.get(NAMES).toPromise()
       .then(categories => {
-          this.categoriesProxy = new CategoriesActionsHandler(categories);
+          this.categoriesActionsHandler = new CategoriesActionsHandler(categories);
       });
   }
 
-  public loadGoods(): Observable<any> {
+  private loadGoods(): Observable<GoodsToView[]> {
     return this.http.get(DATA)
       .pipe(
         take(1),
-        map((goodsData) => this.sortGoods(goodsData))
+        pluck('Value'),
+        map((goodsData: GoodsWrapper) => {
+          const payload = {
+            goodsData: goodsData.Goods,
+            categories: this.categoriesActionsHandler,
+            exchangeRate: this.currencyService.dollarExchangeRate
+          };
+          return sortGoodsWithCategories(payload);
+        })
       );
   }
 
-  public sortGoods({Value: { Goods: goodsData }}: any) {
-    const newObj = {};
-    for (const item of goodsData) {
-      const {C: price, T: goodsId, G: categoryId, P: count} = item;
-      const {G: categoryName, B: listOfGoods} = this.categoriesProxy.findById(categoryId);
+  public startGoodsPolling() {
+    const loadData$ = this.loadGoods();
+    const dollarRate$ = this.currencyService.actualDollarExchangeRate();
 
-      if (!(categoryName in newObj)) {
-        newObj[categoryName] = new Array();
-      }
-      newObj[categoryName].push({
-        price,
-        goodsId,
-        categoryId,
-        count,
-        goodsName: listOfGoods[item.T]
-      });
-    }
-    return newObj;
+    return interval(this.INTERVAL_FETCH_DATA)
+      .pipe(
+          startWith(0),
+          switchMap(() => dollarRate$),
+          switchMap(() => loadData$)
+      );
   }
 }

@@ -1,9 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { BoxComponent } from '@components/goods/box/box.component';
 import { GoodsService } from '@services/goods.service';
-import { map, startWith, switchMap, takeWhile } from 'rxjs/operators';
-import { interval } from 'rxjs/internal/observable/interval';
-import { ICategories, ICategory } from '@models/ICategories';
-import { IGoods } from '@models/IGoods';
 
 @Component({
   selector: 'app-list',
@@ -11,23 +8,19 @@ import { IGoods } from '@models/IGoods';
   styleUrls: ['./list.component.scss']
 })
 export class ListComponent implements OnInit, OnDestroy {
-  private polingIsActive = true;
-  public goodsData: IGoods[];
+  @ViewChild('box', {static: false}) box: BoxComponent;
+  public listOfProducts;
   constructor(private goodsService: GoodsService) { }
 
   ngOnInit() {
-    const setGoodsData = (result: any) => this.goodsData = result;
-    interval(10000)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.goodsService.loadGoods())
-      )
-      .subscribe((result) => {
-        console.log(result);
-      });
+      this.listOfProducts = this.goodsService.startGoodsPolling();
+  }
+
+  trackByFn(index) {
+    return index;
   }
 
   ngOnDestroy() {
-    this.polingIsActive = false;
+    this.listOfProducts.unsubscribe();
   }
 }

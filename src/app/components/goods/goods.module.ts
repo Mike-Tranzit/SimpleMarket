@@ -8,6 +8,6 @@ import { BoxComponent } from './box/box.component';
   imports: [
     CommonModule
   ],
-  exports: [ListComponent]
+  exports: [ListComponent, BoxComponent]
 })
 export class GoodsModule { }
