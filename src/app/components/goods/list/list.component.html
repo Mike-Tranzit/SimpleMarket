@@ -3,7 +3,7 @@
         <div class="products-group__title">{{groupProducts.key}}</div>
         <div class="products-group__item" *ngFor="let product of groupProducts.value" (click)="box.add(product)">
           <div class="products-group__item-name">{{product.goodsName}} ({{product.availableCount}})</div>
-          <div class="products-group__item-price">{{product.price}}</div>
+          <div class="products-group__item-price" [appPrice]="product.price">{{product.price}}</div>
         </div>
     </div>
 </div>

@@ -20,5 +20,6 @@ export function sortGoodsWithCategories({goodsData, categories, exchangeRate}): 
       goodsName
     });
   }
+  console.log(goods);
   return goods;
 }

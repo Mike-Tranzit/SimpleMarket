@@ -40,6 +40,7 @@ export class GoodsService {
         take(1),
         pluck('Value'),
         map((goodsData: GoodsWrapper) => {
+          this.currencyService.actualDollarExchangeRate();
           const payload = {
             goodsData: goodsData.Goods,
             categories: this.categoriesActionsHandler,
@@ -52,12 +53,11 @@ export class GoodsService {
 
   public startGoodsPolling() {
     const loadData$ = this.loadGoods();
-    const dollarRate$ = this.currencyService.actualDollarExchangeRate();
+    // const dollarRate = this.currencyService.actualDollarExchangeRate;
 
     return interval(this.INTERVAL_FETCH_DATA)
       .pipe(
           startWith(0),
-          switchMap(() => dollarRate$),
           switchMap(() => loadData$)
       );
   }
