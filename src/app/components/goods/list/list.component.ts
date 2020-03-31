@@ -17,10 +17,10 @@ export class ListComponent implements OnInit, OnDestroy {
     this.listOfProducts = this.goodsService.startGoodsPolling().subscribe(data => this.listOfProductsData = data);
   }
 
-  lowerCountOfProduct({goodsId, groupName}): void {
-    let product = this.listOfProductsData[groupName].find(item => item.goodsId === goodsId);
-    if (product) {
-      product = {...product, availableCount: product.availableCount--};
+  updateCountOfProduct({goodsId, groupName, count}) {
+    const item = this.listOfProductsData[groupName].find(product => product.goodsId === goodsId);
+    if (item) {
+      item.availableCount = item.availableCount + count;
     }
   }
 

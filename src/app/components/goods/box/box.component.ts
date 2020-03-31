@@ -7,8 +7,9 @@ import { Product } from '@models/interfaces/goods.interface';
   styleUrls: ['./box.component.scss']
 })
 export class BoxComponent implements OnInit {
-  @Output() lowerCountOfProduct = new EventEmitter<{goodsId: number, groupName: string}>();
+  @Output() updateCountOfProduct = new EventEmitter<{goodsId: number, groupName: string, count: number}>();
   public shoppingCard = [];
+  public totalAmount = 0;
   readonly INIT_COUNT_IN_SHOPPING_CARD = 1;
 
   constructor() { }
@@ -16,7 +17,8 @@ export class BoxComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  add({goodsId, price, goodsName, availableCount}: Product, groupName: string): void | never {
+  add(product: Product, groupName: string): void | never {
+      const {goodsId, price, goodsName, availableCount} = product;
       const productIsAvailable = availableCount > 0;
       if (!productIsAvailable) {
         return;
@@ -29,13 +31,36 @@ export class BoxComponent implements OnInit {
             goodsId,
             price,
             count: this.INIT_COUNT_IN_SHOPPING_CARD,
-            goodsName
+            goodsName,
+            groupName
         });
       }
-      this.lowerCountOfProduct.emit({goodsId, groupName});
+      product.availableCount--;
+      this.calculateTotalAmount();
+  }
+
+  private calculateTotalAmount() {
+    const totalAmount = this.shoppingCard.reduce((acc, current) => {acc = acc + (current.price * current.count); return acc; } , 0);
+    const fractionDigits = 2;
+    this.totalAmount = totalAmount.toFixed(fractionDigits);
+  }
+
+  deleteProduct(key: number): void {
+      const product = this.shoppingCard[key];
+      this.updateCountOfProduct.emit({
+        goodsId: product.goodsId,
+        groupName: product.groupName,
+        count: product.count
+      });
+      this.shoppingCard.splice(key, 1);
+      this.calculateTotalAmount();
   }
 
   get shoppingCardIsEmpty(): boolean {
     return this.shoppingCard.length > 0;
+  }
+
+  trackByFn(index) {
+    return index;
   }
 }

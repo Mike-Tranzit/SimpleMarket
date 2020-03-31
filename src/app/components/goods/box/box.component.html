@@ -1,3 +1,22 @@
 <div class="box-wrapper" *ngIf="shoppingCardIsEmpty">
-
+    <table>
+      <tr>
+        <th>Наименование товара и описание</th>
+        <th>Количество</th>
+        <th>Цена</th>
+        <th></th>
+      </tr>
+      <tr *ngFor="let product of shoppingCard | keyvalue; trackBy: trackByFn">
+        <td>{{product.value.goodsName}}</td>
+        <td>{{product.value.count}}</td>
+        <td>{{product.value.price}} руб./шт</td>
+        <td><a href="#" (click)="deleteProduct(product.key)">Удалить</a></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Общая стоимость {{totalAmount}} руб.</td>
+      </tr>
+    </table>
 </div>
