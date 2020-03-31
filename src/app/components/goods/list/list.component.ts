@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, SimpleChange, OnChanges } from '@angular/core';
 import { BoxComponent } from '@components/goods/box/box.component';
 import { GoodsService } from '@services/goods.service';
 
@@ -13,7 +13,7 @@ export class ListComponent implements OnInit, OnDestroy {
   constructor(private goodsService: GoodsService) { }
 
   ngOnInit() {
-      this.listOfProducts = this.goodsService.startGoodsPolling();
+    this.listOfProducts = this.goodsService.startGoodsPolling();
   }
 
   trackByFn(index) {

@@ -23,3 +23,12 @@ export interface Product {
     availableCount: number;
     goodsName: string;
 }
+
+export interface GoodsPricesBuffer {
+  [key: number]: number;
+}
+
+export interface SortGoodsToView {
+  actualData: GoodsToView[];
+  cloneGoodsPricesBuffer: GoodsPricesBuffer;
+}

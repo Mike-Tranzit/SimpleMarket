@@ -1,25 +1,35 @@
-import { GoodsToView } from '@models/interfaces/goods.interface';
+import { SortGoodsToView } from '@models/interfaces/goods.interface';
 
 export const fixedExchangeRate = (price, exchangeRate, fractionDigits = 1) => +(price * exchangeRate).toFixed(fractionDigits);
 
-export function sortGoodsWithCategories({goodsData, categories, exchangeRate}): GoodsToView[]  {
-  const goods = [];
+export function sortGoodsWithCategories({goodsData, categories, exchangeRate, goodsPricesBuffer}): SortGoodsToView {
+  const actualData = [];
+  const cloneGoodsPricesBuffer = {...goodsPricesBuffer};
+
   for (const item of goodsData) {
 
     const {C: price, T: goodsId, G: categoryId, P: availableCount} = item;
     const {G: categoryName, B: listOfGoods} = categories.findById(categoryId);
     const goodsName =  listOfGoods[goodsId]['N'];
 
-    goods[categoryName] = goods[categoryName] || [];
+    actualData[categoryName] = actualData[categoryName] || [];
 
-    goods[categoryName].push({
+    const previousPrice = cloneGoodsPricesBuffer[goodsId];
+    cloneGoodsPricesBuffer[goodsId] = fixedExchangeRate(price, exchangeRate);
+
+    actualData[categoryName].push({
       price: fixedExchangeRate(price, exchangeRate),
+      previousPrice,
       goodsId,
       categoryId,
       availableCount,
       goodsName
     });
   }
-  console.log(goods);
-  return goods;
+  return {
+    actualData,
+    cloneGoodsPricesBuffer
+  };
 }
+
+export class
