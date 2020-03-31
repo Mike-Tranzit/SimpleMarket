@@ -1,6 +1,6 @@
 import { SortGoodsToView } from '@models/interfaces/goods.interface';
 
-export const fixedExchangeRate = (price, exchangeRate, fractionDigits = 1) => +(price * exchangeRate).toFixed(fractionDigits);
+export const fixedExchangeRate = (price, exchangeRate, fractionDigits = 2) => +(price * exchangeRate).toFixed(fractionDigits);
 
 export function sortGoodsWithCategories({goodsData, categories, exchangeRate, goodsPricesBuffer}): SortGoodsToView {
   const actualData = [];
@@ -31,5 +31,3 @@ export function sortGoodsWithCategories({goodsData, categories, exchangeRate, go
     cloneGoodsPricesBuffer
   };
 }
-
-export class

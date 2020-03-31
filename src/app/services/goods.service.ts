@@ -22,7 +22,7 @@ import { CategoriesActionsHandler } from '@models/utils/category.proxy.utils';
 export class GoodsService {
   public categoriesActionsHandler;
   public goodsPricesBuffer: GoodsPricesBuffer;
-  private INTERVAL_FETCH_DATA = 10000;
+  readonly INTERVAL_FETCH_DATA = 10000;
 
   constructor(private http: HttpClient, private currencyService: CurrencyService) { }
 

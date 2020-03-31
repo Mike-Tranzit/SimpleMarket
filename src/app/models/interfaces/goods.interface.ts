@@ -19,7 +19,6 @@ export interface GoodsToView {
 export interface Product {
     price: number;
     goodsId: number;
-    categoryId: number;
     availableCount: number;
     goodsName: string;
 }

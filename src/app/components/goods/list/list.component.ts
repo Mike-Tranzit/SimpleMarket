@@ -10,10 +10,18 @@ import { GoodsService } from '@services/goods.service';
 export class ListComponent implements OnInit, OnDestroy {
   @ViewChild('box', {static: false}) box: BoxComponent;
   public listOfProducts;
+  public listOfProductsData;
   constructor(private goodsService: GoodsService) { }
 
   ngOnInit() {
-    this.listOfProducts = this.goodsService.startGoodsPolling();
+    this.listOfProducts = this.goodsService.startGoodsPolling().subscribe(data => this.listOfProductsData = data);
+  }
+
+  lowerCountOfProduct({goodsId, groupName}): void {
+    let product = this.listOfProductsData[groupName].find(item => item.goodsId === goodsId);
+    if (product) {
+      product = {...product, availableCount: product.availableCount--};
+    }
   }
 
   trackByFn(index) {

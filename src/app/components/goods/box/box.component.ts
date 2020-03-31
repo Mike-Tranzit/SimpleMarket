@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Product } from '@models/interfaces/goods.interface';
 
 @Component({
@@ -7,24 +7,32 @@ import { Product } from '@models/interfaces/goods.interface';
   styleUrls: ['./box.component.scss']
 })
 export class BoxComponent implements OnInit {
+  @Output() lowerCountOfProduct = new EventEmitter<{goodsId: number, groupName: string}>();
   public shoppingCard = [];
+  readonly INIT_COUNT_IN_SHOPPING_CARD = 1;
+
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  add(item: Product): void | never {
-      const productIsAvailable = item.availableCount > 0;
-      if (!productIsAvailable) return;
-
-      /*const itemIsNew = typeof this.shoppingCard[item.goodsId] === 'undefined';
-      if (itemIsNew) {
-        this.shoppingCard[item.goodsId] = Object.assign({}, item);
-      } else {
-        this.shoppingCard[item.goodsId].availableCount++;
+  add({goodsId, price, goodsName, availableCount}: Product, groupName: string): void | never {
+      const productIsAvailable = availableCount > 0;
+      if (!productIsAvailable) {
+        return;
       }
-      item.availableCount--;
-      console.log(this.shoppingCard);*/
+      const existingShoppingItem = this.shoppingCard.find(item => item.goodsId === goodsId);
+      if (existingShoppingItem) {
+        existingShoppingItem.count++;
+      } else {
+        this.shoppingCard.push({
+            goodsId,
+            price,
+            count: this.INIT_COUNT_IN_SHOPPING_CARD,
+            goodsName
+        });
+      }
+      this.lowerCountOfProduct.emit({goodsId, groupName});
   }
 
   get shoppingCardIsEmpty(): boolean {

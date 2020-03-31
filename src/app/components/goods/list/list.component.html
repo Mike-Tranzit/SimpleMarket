@@ -1,10 +1,10 @@
 <div class="products-wrapper">
-    <div class="products-group" *ngFor="let groupProducts of (listOfProducts | async) | keyvalue; trackBy: trackByFn">
+    <div class="products-group" *ngFor="let groupProducts of listOfProductsData | keyvalue; trackBy: trackByFn">
         <div class="products-group__title">{{groupProducts.key}}</div>
-        <div class="products-group__item" *ngFor="let product of groupProducts.value" (click)="box.add(product)">
+        <div class="products-group__item" *ngFor="let product of groupProducts.value" (click)="box.add(product, groupProducts.key)">
           <div class="products-group__item-name">{{product.goodsName}} ({{product.availableCount}})</div>
           <div class="products-group__item-price" appPrice [price]="product.price" [previousPrice]="product.previousPrice">{{product.price}}</div>
         </div>
     </div>
 </div>
-<app-box #box></app-box>
+<app-box #box (lowerCountOfProduct)="lowerCountOfProduct($event)"></app-box>
