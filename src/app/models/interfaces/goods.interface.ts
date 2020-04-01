@@ -13,11 +13,12 @@ export interface GoodsBase {
 }
 
 export interface GoodsToView {
-  [key: string]: Product[];
+  [key: string]: Product;
 }
 
 export interface Product {
     price: number;
+    previousPrice: number;
     goodsId: number;
     availableCount: number;
     goodsName: string;

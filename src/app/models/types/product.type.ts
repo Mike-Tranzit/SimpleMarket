@@ -1,3 +1,3 @@
 import { Product } from '@models/interfaces/goods.interface';
 
-export type ProductInBox = Pick<Product, 'price' | 'goodsId' | 'goodsName'> & { count: number, groupName: string };
+export type ProductInBox = Pick<Product, 'price' | 'goodsId' | 'goodsName'> & { count: number | string, groupName: string };

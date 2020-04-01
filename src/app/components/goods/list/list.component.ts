@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { BoxComponent } from '@components/goods/box/box.component';
 import { GoodsService } from '@services/goods.service';
-import {GoodsToView, Product} from '@models/interfaces/goods.interface.js';
+import { GoodsToView } from '@models/interfaces/goods.interface.js';
+import { ProductInBox } from '@models/types/product.type';
 
 @Component({
   selector: 'app-list',
@@ -15,10 +16,10 @@ export class ListComponent implements OnInit, OnDestroy {
   constructor(private goodsService: GoodsService) { }
 
   ngOnInit() {
-    this.listOfProducts = this.goodsService.startGoodsPolling().subscribe(data => this.listOfProductsData = data);
+    this.listOfProducts = this.goodsService.startGoodsPolling().subscribe((data: GoodsToView[]) => this.listOfProductsData = data);
   }
 
-  updateCountOfProduct({goodsId, groupName, count}: {goodsId: number, groupName: string, count: number}): void {
+  updateCountOfProduct({goodsId, groupName, count}: Pick<ProductInBox, 'goodsId' | 'groupName' | 'count'>): void {
     const item = this.listOfProductsData[groupName].find(product => product.goodsId === goodsId);
     if (item) {
       item.availableCount = item.availableCount + count;
