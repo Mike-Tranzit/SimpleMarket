@@ -4,10 +4,13 @@ import { PriceFieldColors } from '@models/enums/price.color.enum.js';
 @Directive({
   selector: '[appPrice]'
 })
-export class PriceDirective implements OnChanges{
+export class PriceDirective implements OnChanges {
   @Input('price') price: any;
   @Input('previousPrice') previousPrice: any;
+  @HostBinding('style.backgroundColor') priceFieldBgColor: string;
   @HostBinding('style.color') priceFieldColor: string;
+
+  readonly FONT_COLOR_AFTER_CHANGE = '#FFFFFF';
 
   constructor() {
   }
@@ -32,13 +35,21 @@ export class PriceDirective implements OnChanges{
     } else {
       this.priceBecomeLower();
     }
+    this.setColorAfterChange();
+  }
+
+  private setColorAfterChange(): void | unknown {
+    if (this.priceFieldColor === this.FONT_COLOR_AFTER_CHANGE) {
+      return;
+    }
+    this.priceFieldColor = this.FONT_COLOR_AFTER_CHANGE;
   }
 
   private priceBecomeLower(): void  {
-    this.priceFieldColor = PriceFieldColors.DOWN;
+    this.priceFieldBgColor = PriceFieldColors.DOWN;
   }
 
   private priceBecomeHigher(): void {
-    this.priceFieldColor = PriceFieldColors.UP;
+    this.priceFieldBgColor = PriceFieldColors.UP;
   }
 }

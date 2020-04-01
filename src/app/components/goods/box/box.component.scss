@@ -1,0 +1,64 @@
+.box-wrapper {
+  font-family: 'Arial', sens-selif;
+  max-width: 1000px;
+  margin: 20px auto 0 auto;
+  padding: 0 20px;
+  border: 1px solid black;
+
+  .box-inner {
+    box-sizing: border-box;
+    border: 1px solid #A8ADAF;
+    border-radius: 3px;
+    margin: 5px;
+
+    & > div {
+      display: flex;
+      justify-content: space-between;
+      div {
+        padding: 5px;
+      }
+
+      .box-inner__title:first-child {
+        padding-left: 11px;
+      }
+
+      .box-inner__title:not(:first-child) {
+      padding-left: 1px;
+      }
+    }
+
+    &__body {
+      padding: 6px;
+    }
+
+    &__title {
+      background-color: #D2DEE2;
+      font-weight: 600;
+      color: #444445;
+    }
+
+    &__name {
+      flex-basis: 45%;
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    &__count {
+      flex-basis: 20%;
+      &-input {
+        padding: 2px;
+        width: 2em;
+      }
+    }
+
+    &__price {
+      flex-basis: 20%;
+    }
+
+    &__action {
+      flex-basis: 20%;
+    }
+  }
+}
+
+

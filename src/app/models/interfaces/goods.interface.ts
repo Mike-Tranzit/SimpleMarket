@@ -23,6 +23,7 @@ export interface Product {
     goodsName: string;
 }
 
+
 export interface GoodsPricesBuffer {
   [key: number]: number;
 }
