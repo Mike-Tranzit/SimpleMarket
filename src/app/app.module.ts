@@ -10,7 +10,8 @@ import { GoodsService } from '@services/goods.service';
 
 
 import { environment } from '../environments/environment';
-import {PriceTestComponent} from '@app/tests/components/price-test/price-test.component';
+import { PriceTestComponent } from '@app/tests/components/price-test/price-test.component';
+import { PriceDirective } from '@app/directives/price.directive';
 
 export function CategoriesPreloader(goodsServices: GoodsService) {
   return () => goodsServices.loadCategories();
@@ -19,7 +20,7 @@ export function CategoriesPreloader(goodsServices: GoodsService) {
 @NgModule({
   declarations: [
     AppComponent,
-    environment.production ? [] : [PriceTestComponent]
+    PriceTestComponent
   ],
   imports: [
     BrowserModule,
