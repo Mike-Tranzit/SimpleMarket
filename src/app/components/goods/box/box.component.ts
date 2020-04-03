@@ -5,68 +5,98 @@ import {
   EventEmitter,
   OnChanges,
   Input,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
   SimpleChange
 } from '@angular/core';
 import { GoodsToView, Product } from '@models/interfaces/goods.interface';
-import { ProductInBox } from '@models/types/product.type';
+import { ProductInBox, UpdateProductPayload } from '@models/types/product.type';
+import { inputValueNotNull } from '@models/decorators/input-not-null.decorator';
+import { findElement, getProperty, findCb } from '@models/utils/custom.utils';
+import { BoxOrderChecker } from '@models/classes/box-order-checker.class';
+import { ProductCountActionEnum } from '@models/enums/product-count-action.enum';
 
 @Component({
   selector: 'app-box',
   templateUrl: './box.component.html',
-  styleUrls: ['./box.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./box.component.scss']
 })
 export class BoxComponent implements OnInit, OnChanges {
   @Input() listOfProductsData: GoodsToView[];
-  @Output() updateCountOfProduct = new EventEmitter<{goodsId: number, groupName: string, count: number}>();
+  @Output() updateCountOfProduct = new EventEmitter<UpdateProductPayload>();
   public shoppingCard: ProductInBox[] = [];
   public totalAmount = 0;
-  readonly INIT_COUNT_IN_SHOPPING_CARD = 1;
+  readonly INIT_COUNT_IN_SHOPPING_CARD = 0;
 
-  constructor(private cdr: ChangeDetectorRef) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(changes: { [property: string]: SimpleChange }) {
-    const listWasChanged = changes.listOfProductsData !== null && changes.listOfProductsData.previousValue;
+  ngOnChanges(changes: { [property: string]: SimpleChange }): void {
+    const listWasChanged = changes.listOfProductsData !== null && getProperty(changes.listOfProductsData, 'previousValue');
     if (listWasChanged) {
-      const { currentValue } = changes.listOfProductsData;
-      for (const itemOfCard of this.shoppingCard) {
-        const item = this.listOfProductsData[itemOfCard.groupName].find(product => product.goodsId === itemOfCard.goodsId);
-      }
+      this.updateProductsInBoxAfterDc(changes.listOfProductsData);
     }
   }
 
-  add(product: Product, groupName: string): void | unknown {
-      const {goodsId, price, goodsName, availableCount} = product;
+  private updateProductsInBoxAfterDc({ currentValue }) {
+    for (const key of Object.keys(this.shoppingCard)) {
+
+      const itemOfCard = this.shoppingCard[key];
+      const propertyName = getProperty(itemOfCard, 'groupName');
+      const item = findElement<Product>(currentValue[propertyName], findCb(itemOfCard, 'goodsId'));
+
+      if (item) {
+        const exceededLimit = itemOfCard.count > item.availableCount;
+        if (exceededLimit) {
+          itemOfCard.count = item.availableCount;
+        } else {
+          item.availableCount = item.availableCount - itemOfCard.count;
+        }
+        itemOfCard.price = item.price;
+      } else {
+        this.deleteProductByKey(itemOfCard, key);
+      }
+    }
+    this.calculateTotalAmount();
+  }
+
+  add(product: Product, groupName: any): void | unknown {
+      const { availableCount } = product;
       const productIsAvailable = availableCount > 0;
       if (!productIsAvailable) {
         return;
       }
-      const existingShoppingItem = (this.shoppingCard as ProductInBox[]).find(item => item.goodsId === goodsId);
-      if (existingShoppingItem) {
-        existingShoppingItem.count = +existingShoppingItem.count + 1;
-      } else {
-        const initBoxProductState: ProductInBox  = {
-          goodsId,
-          price,
-          count: this.INIT_COUNT_IN_SHOPPING_CARD,
-          goodsName,
-          groupName
-        };
-        this.shoppingCard.push(initBoxProductState);
 
+      let existingShoppingItem = findElement<ProductInBox>((this.shoppingCard as ProductInBox[]), findCb(product, 'goodsId'));
+      if (!existingShoppingItem) {
+        existingShoppingItem = this.addInitValueToBox(product, groupName);
       }
-      product.availableCount--;
+      this.increaseProductCount(existingShoppingItem);
+      this.emitChangeCountOfProductsInList(existingShoppingItem, ProductCountActionEnum.DECREASE);
       this.calculateTotalAmount();
-      this.cdr.detectChanges();
+  }
+
+  increaseProductCount(existingShoppingItem: ProductInBox) {
+    existingShoppingItem.count = +existingShoppingItem.count + 1;
+  }
+
+  addInitValueToBox(product: Product, groupName: string) {
+    const {goodsId, price, goodsName} = product;
+    const initBoxProductState: ProductInBox  = {
+      goodsId,
+      price,
+      count: this.INIT_COUNT_IN_SHOPPING_CARD,
+      goodsName,
+      groupName
+    };
+    this.shoppingCard.push(initBoxProductState);
+    return initBoxProductState;
   }
 
   private calculateTotalAmount(): void {
-    const totalAmount = this.shoppingCard.reduce((acc, current) => {acc = acc + (current.price * +current.count); return acc; } , 0);
+    const totalAmount = this.shoppingCard.reduce((acc, current) => {
+      return acc + (current.price * +current.count);
+     } , 0);
     const fractionDigits = 2;
     this.totalAmount = +totalAmount.toFixed(fractionDigits);
   }
@@ -74,13 +104,22 @@ export class BoxComponent implements OnInit, OnChanges {
   deleteProduct(event: Event, key: number): void {
       event.preventDefault();
       const product = this.shoppingCard[key];
-      this.updateCountOfProduct.emit({
-        goodsId: product.goodsId,
-        groupName: product.groupName,
-        count: +product.count
-      });
-      this.shoppingCard.splice(key, 1);
+      this.deleteProductByKey(product, key);
       this.calculateTotalAmount();
+  }
+
+  private deleteProductByKey(product, key) {
+    this.emitChangeCountOfProductsInList(product, ProductCountActionEnum.INCREASE);
+    this.shoppingCard.splice(key, 1);
+  }
+
+  private emitChangeCountOfProductsInList(product: ProductInBox, action: string) {
+    this.updateCountOfProduct.emit({
+      goodsId: product.goodsId,
+      groupName: product.groupName,
+      count: +product.count,
+      action
+    });
   }
 
   get shoppingCardIsEmpty(): boolean {
@@ -91,35 +130,21 @@ export class BoxComponent implements OnInit, OnChanges {
     return index;
   }
 
-  checkAvailableCount(event: KeyboardEvent, product: ProductInBox): void | unknown {
-        const element = (event.target as HTMLInputElement);
-        const value = +element.value;
-        if (Number.isNaN(value) || value === product.count) {
-          const newElementValue = element.value === '' ? element.value : String(product.count);
-          element.value = newElementValue;
-          return;
-        }
-        const item = this.listOfProductsData[product.groupName].find(i => i.goodsId === product.goodsId);
-        if (item) {
-          const availableCount = item.availableCount;
-          const productCount = +product.count;
-          const countBecameLow = value < productCount;
+  @inputValueNotNull
+  checkAvailableCount(element: HTMLInputElement, productInBox: ProductInBox): void {
+        const propertyName = getProperty(productInBox, 'groupName');
+        const product = findElement<Product>(this.listOfProductsData[propertyName], findCb(productInBox, 'goodsId'));
 
-          if (countBecameLow) {
-            product.count = value > 0 ? value : '';
-            item.availableCount = availableCount + (productCount - value);
-          } else {
-            const availableCountToOrder = availableCount + productCount;
-            const exceededLimit = availableCountToOrder < value;
-            if (exceededLimit) {
-              product.count = availableCountToOrder;
-              item.availableCount = 0;
-            } else {
-              const newAvailableCount = availableCountToOrder - value;
-              product.count = value;
-              item.availableCount = newAvailableCount < 0 ? 0 : newAvailableCount;
-            }
-          }
+        const payload = {
+          product,
+          productInBox,
+          element,
+        };
+
+        const model = new BoxOrderChecker(payload).convertAndSetParams();
+        const actions = model.checkValueBecameLow() || model.checkValueExceededLimit() || model.setNewAvailableCount();
+        if (actions) {
+          this.calculateTotalAmount();
         }
   }
 }

@@ -19,6 +19,7 @@
       "@services/*": ["app/services/*"],
       "@components/*": ["app/components/*"],
       "@models/*": ["app/models/*"],
+      "@tests/*": ["app/tests/*"],
       "@app/*": ["app/*"],
       "@src/*": ["/*"]
     }

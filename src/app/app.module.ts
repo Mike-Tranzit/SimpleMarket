@@ -8,19 +8,24 @@ import { AppComponent } from './app.component';
 import { GoodsModule } from '@components/goods/goods.module';
 import { GoodsService } from '@services/goods.service';
 
+
+import { environment } from '../environments/environment';
+import {PriceTestComponent} from '@app/tests/components/price-test/price-test.component';
+
 export function CategoriesPreloader(goodsServices: GoodsService) {
   return () => goodsServices.loadCategories();
 }
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    environment.production ? [] : [PriceTestComponent]
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    GoodsModule
+    GoodsModule,
   ],
   providers: [
     {

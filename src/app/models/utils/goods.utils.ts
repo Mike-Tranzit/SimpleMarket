@@ -10,7 +10,7 @@ export function sortGoodsWithCategories({goodsData, categories, exchangeRate, go
 
     const {C: price, T: goodsId, G: categoryId, P: availableCount} = item;
     const {G: categoryName, B: listOfGoods} = categories.findById(categoryId);
-    const goodsName =  listOfGoods[goodsId]['N'];
+    const goodsName =  listOfGoods[goodsId].N;
 
     actualData[categoryName] = actualData[categoryName] || [];
 

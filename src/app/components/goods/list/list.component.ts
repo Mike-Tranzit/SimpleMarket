@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { BoxComponent } from '@components/goods/box/box.component';
 import { GoodsService } from '@services/goods.service';
-import { GoodsToView } from '@models/interfaces/goods.interface.js';
-import { ProductInBox } from '@models/types/product.type';
+import { GoodsToView, Product } from '@models/interfaces/goods.interface.js';
+import { UpdateProductPayload } from '@models/types/product.type';
+import { ProductCountActionEnum } from '@models/enums/product-count-action.enum';
+import { findElement } from '@models/utils/custom.utils';
 
 @Component({
   selector: 'app-list',
@@ -19,10 +21,21 @@ export class ListComponent implements OnInit, OnDestroy {
     this.listOfProducts = this.goodsService.startGoodsPolling().subscribe((data: GoodsToView[]) => this.listOfProductsData = data);
   }
 
-  updateCountOfProduct({goodsId, groupName, count}: Pick<ProductInBox, 'goodsId' | 'groupName' | 'count'>): void {
-    const item = this.listOfProductsData[groupName].find(product => product.goodsId === goodsId);
+  updateCountOfProduct({goodsId, groupName, count, action}: UpdateProductPayload): void {
+    const cb = product => product.goodsId === goodsId;
+    const item = findElement<any>(this.listOfProductsData[groupName], cb);
     if (item) {
-      item.availableCount = item.availableCount + count;
+      switch (action) {
+        case ProductCountActionEnum.INCREASE: {
+          item.availableCount = item.availableCount + count;
+          break;
+        }
+        case ProductCountActionEnum.DECREASE: {
+          item.availableCount--;
+          break;
+        }
+        default:
+      }
     }
   }
 

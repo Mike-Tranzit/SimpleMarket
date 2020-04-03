@@ -1,12 +1,12 @@
 import { Directive, Input, SimpleChange, OnChanges, HostBinding } from '@angular/core';
-import { PriceFieldColors } from '@models/enums/price.color.enum.js';
+import { PriceFieldColors } from '@models/enums/price-color.enum';
 
 @Directive({
   selector: '[appPrice]'
 })
 export class PriceDirective implements OnChanges {
-  @Input('price') price: any;
-  @Input('previousPrice') previousPrice: any;
+  @Input() price: any;
+  @Input() previousPrice: any;
   @HostBinding('style.backgroundColor') priceFieldBgColor: string;
   @HostBinding('style.color') priceFieldColor: string;
 

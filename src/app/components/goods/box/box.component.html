@@ -10,13 +10,13 @@
 
         <div class="box-inner__body" *ngFor="let product of shoppingCard | keyvalue; trackBy: trackByFn">
           <div class="box-inner__name">{{product.value.goodsName}}</div>
-          <div class="box-inner__count"><input class="box-inner__count-input" type="text" [value]="product.value.count" (keyup)="checkAvailableCount($event, product.value)"></div>
-          <div class="box-inner__price">{{product.value.price}}</div>
+          <div class="box-inner__count"><input class="box-inner__count-input" type="text" [value]="product.value.count" (keyup)="checkAvailableCount($event, product.value)"> шт</div>
+          <div class="box-inner__price">{{product.value.price}} руб./шт</div>
           <div class="box-inner__action"><a href="#" (click)="deleteProduct($event, product.key)">Удалить</a></div>
         </div>
     </div>
 
     <div class="total-price">
-      <h4>Общая стоимость {{totalAmount}} руб.</h4>
+      <div>Общая стоимость <span>{{totalAmount}} руб.</span></div>
     </div>
 </div>
