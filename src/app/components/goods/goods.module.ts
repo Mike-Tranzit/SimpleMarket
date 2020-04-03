@@ -11,6 +11,6 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     FormsModule
   ],
-  exports: [ListComponent, BoxComponent, PriceDirective]
+  exports: [ListComponent, PriceDirective]
 })
 export class GoodsModule { }
